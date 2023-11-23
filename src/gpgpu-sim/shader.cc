@@ -220,7 +220,7 @@ void shader_core_ctx::create_schedulers() {
             &m_pipeline_reg[ID_OC_SP], &m_pipeline_reg[ID_OC_DP],
             &m_pipeline_reg[ID_OC_SFU], &m_pipeline_reg[ID_OC_INT],
             &m_pipeline_reg[ID_OC_TENSOR_CORE], m_specilized_dispatch_reg,
-            &m_pipeline_reg[ID_OC_MEM], i, m_config->gpgpu_scheduler_string));
+            &m_pipeline_reg[ID_OC_MEM], i, m_config->gpgpu_scheduler_string, m_config->gpgpu_dynamic_swl));
         break;
       default:
         abort();
@@ -1542,21 +1542,27 @@ swl_scheduler::swl_scheduler(shader_core_stats *stats, shader_core_ctx *shader,
                              register_set *sfu_out, register_set *int_out,
                              register_set *tensor_core_out,
                              std::vector<register_set *> &spec_cores_out,
-                             register_set *mem_out, int id, char *config_string)
+                             register_set *mem_out, int id, char *config_string, bool is_dynamic_swl)
     : scheduler_unit(stats, shader, scoreboard, simt, warp, sp_out, dp_out,
                      sfu_out, int_out, tensor_core_out, spec_cores_out, mem_out,
                      id) {
   unsigned m_prioritization_readin;
+
   int ret = sscanf(config_string, "warp_limiting:%d:%d",
                    &m_prioritization_readin, &m_num_warps_to_limit);
+
   assert(2 == ret);
   m_prioritization = (scheduler_prioritization_type)m_prioritization_readin;
   // Currently only GTO is implemented
   assert(m_prioritization == SCHEDULER_PRIORITIZATION_GTO);
   assert(m_num_warps_to_limit <= shader->get_config()->max_warps_per_shader);
+
+  m_is_dynamic_swl = is_dynamic_swl;
 }
 
 void swl_scheduler::order_warps() {
+
+
   if (SCHEDULER_PRIORITIZATION_GTO == m_prioritization) {
     order_by_priority(m_next_cycle_prioritized_warps, m_supervised_warps,
                       m_last_supervised_issued,

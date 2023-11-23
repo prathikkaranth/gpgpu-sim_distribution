@@ -547,7 +547,7 @@ class swl_scheduler : public scheduler_unit {
                 register_set *dp_out, register_set *sfu_out,
                 register_set *int_out, register_set *tensor_core_out,
                 std::vector<register_set *> &spec_cores_out,
-                register_set *mem_out, int id, char *config_string);
+                register_set *mem_out, int id, char *config_string, bool is_dynamic_swl);
   virtual ~swl_scheduler() {}
   virtual void order_warps();
   virtual void done_adding_supervised_warps() {
@@ -557,6 +557,7 @@ class swl_scheduler : public scheduler_unit {
  protected:
   scheduler_prioritization_type m_prioritization;
   unsigned m_num_warps_to_limit;
+  bool m_is_dynamic_swl;
 };
 
 class opndcoll_rfu_t {  // operand collector based register file unit
