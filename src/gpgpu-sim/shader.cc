@@ -1558,11 +1558,22 @@ swl_scheduler::swl_scheduler(shader_core_stats *stats, shader_core_ctx *shader,
   assert(m_num_warps_to_limit <= shader->get_config()->max_warps_per_shader);
 
   m_is_dynamic_swl = is_dynamic_swl;
+  m_cycle_count = 0;
+  if(m_is_dynamic_swl){
+      m_num_warps_to_limit = 1;
+  }
 }
 
 void swl_scheduler::order_warps() {
 
-
+  m_cycle_count++;
+  if(m_is_dynamic_swl){
+      if(m_cycle_count % 1000 == 0 && m_num_warps_to_limit < 32){
+          m_num_warps_to_limit *= 2;
+          // print m_num_warps_to_limit, this, m_cycle_count
+          printf("m_num_warps_to_limit = %d, this = %p, m_cycle_count = %d\n", m_num_warps_to_limit, this, m_cycle_count);
+      }
+  }
   if (SCHEDULER_PRIORITIZATION_GTO == m_prioritization) {
     order_by_priority(m_next_cycle_prioritized_warps, m_supervised_warps,
                       m_last_supervised_issued,

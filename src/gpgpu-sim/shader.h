@@ -558,6 +558,7 @@ class swl_scheduler : public scheduler_unit {
   scheduler_prioritization_type m_prioritization;
   unsigned m_num_warps_to_limit;
   bool m_is_dynamic_swl;
+  int m_cycle_count;
 };
 
 class opndcoll_rfu_t {  // operand collector based register file unit
